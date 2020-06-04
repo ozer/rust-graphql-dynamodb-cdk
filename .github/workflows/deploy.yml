@@ -1,0 +1,27 @@
+name: Main Workflow
+on:
+  push:
+    branches:
+      - master
+
+env:
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
+
+jobs:
+  build:
+      name: Deploy ECR
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@master
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+
+        - name: Build, Tag, Push Image to AWS ECR  
+          run: |
+            docker build -t coffee-shop-api .
+            docker tag coffee-shop-api:latest $ECR_REGISTRY/coffee-shop-api:latest
+            docker push $ECR_REGISTRY/coffee-shop-api:latest
