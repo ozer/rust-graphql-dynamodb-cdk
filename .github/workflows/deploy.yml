@@ -4,9 +4,6 @@ on:
     branches:
       - master
 
-env:
-  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-
 
 jobs:
   build:
@@ -27,8 +24,32 @@ jobs:
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
 
-        - name: Build, Tag, Push Image to AWS ECR  
+        - name: Build, Tag, Push Image to AWS ECR 
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            ECR_REPOSITORY: coffee-shop-api
+            IMAGE_TAG: ${{ github.sha }}
           run: |
-            docker build -t coffee-shop-api .
-            docker tag coffee-shop-api:latest $ECR_REGISTRY/coffee-shop-api:latest
-            docker push $ECR_REGISTRY/coffee-shop-api:latest
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+        - name: Download task definition
+          run: |
+            aws ecs describe-task-definition --task-definition CoffeeShopAPI --query taskDefinition > task-definition.json
+
+        - name: Fill in the new image ID in the Amazon ECS task definition
+          id: task-def
+          uses: aws-actions/amazon-ecs-render-task-definition@v1
+          with:
+            task-definition: task-definition.json
+            container-name: coffee-shop-api-container
+            image: ${{ steps.build-image.outputs.image }}
+
+        - name: Deploy Amazon ECS task definition
+          uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+          with:
+            task-definition: ${{ steps.task-def.outputs.task-definition }}
+            service: coffee-shop-api-service
+            cluster: coffee-shop-cluster
+            wait-for-service-stability: true
