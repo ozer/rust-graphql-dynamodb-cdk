@@ -84,6 +84,7 @@ impl MutationRoot {
 
         match db_client.put_item(input).await {
             Ok(output) => {
+                println!("output: {:?}", output);
                 println!("Success!");
             }
             Err(error) => {
@@ -103,9 +104,7 @@ mod filters {
 
     pub fn health() -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone
     {
-        warp::path!("health").and(warp::get()).map(|| {
-            Ok("Ok")
-        })
+        warp::path!("health").and(warp::get()).map(|| Ok("Ok"))
     }
 
     pub fn graphql(
@@ -168,6 +167,8 @@ async fn main() {
     let routes = index.or(filters::health()).or(graphql);
 
     println!("Steps#4");
+
+    println!("Server is runnning on PORT 8080");
 
     warp::serve(routes).run(([0, 0, 0, 0], 8080)).await;
 }
