@@ -1,100 +1,17 @@
-use async_graphql::{Context, EmptySubscription, FieldResult, InputObject, Object, Schema};
+mod app_state;
+mod coffee_type;
+mod database;
+mod graphql_schema;
+
+use async_graphql::{EmptySubscription, Schema};
 use dotenv;
-use rusoto_core::Region;
-use rusoto_credential::{EnvironmentProvider, ProvideAwsCredentials};
-use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, PutItemInput};
-use std::collections::HashMap;
 use warp::Filter;
 
-pub struct QueryRoot;
-
-#[derive(Clone)]
-pub struct AppState {
-    pub db_client: DynamoDbClient,
-}
-
-#[Object]
-impl QueryRoot {
-    async fn me(&self) -> FieldResult<String> {
-        Ok(String::from("Ozericco!"))
-    }
-}
-
-#[InputObject]
-pub struct OrderCoffeeInput {
-    #[field(name = "coffeeName")]
-    coffee_name: String,
-}
-
-pub struct MutationRoot;
-
-#[Object]
-impl MutationRoot {
-    #[field(name = "orderCoffee")]
-    async fn order_coffee(
-        &self,
-        ctx: &Context<'_>,
-        input: OrderCoffeeInput,
-    ) -> FieldResult<String> {
-        let db_client: DynamoDbClient = ctx.data::<AppState>().db_client.clone();
-
-        let mut order = HashMap::new();
-
-        let pk = AttributeValue {
-            b: None,
-            bool: None,
-            bs: None,
-            l: None,
-            m: None,
-            s: Some(input.coffee_name),
-            ns: None,
-            null: None,
-            n: None,
-            ss: None,
-        };
-
-        let sk = AttributeValue {
-            b: None,
-            bool: None,
-            bs: None,
-            l: None,
-            m: None,
-            s: Some("ozer".to_string()),
-            ns: None,
-            null: None,
-            n: None,
-            ss: None,
-        };
-
-        order.insert("pk".to_string(), pk);
-        order.insert("sk".to_string(), sk);
-
-        let input = PutItemInput {
-            condition_expression: None,
-            conditional_operator: None,
-            expected: None,
-            expression_attribute_names: None,
-            table_name: String::from("CoffeeShop"),
-            item: order,
-            return_consumed_capacity: None,
-            return_item_collection_metrics: None,
-            expression_attribute_values: None,
-            return_values: None,
-        };
-
-        match db_client.put_item(input).await {
-            Ok(output) => {
-                println!("output: {:?}", output);
-                println!("Success!");
-            }
-            Err(error) => {
-                println!("Error: {:?}", error);
-            }
-        }
-
-        Ok("hey".to_string())
-    }
-}
+use app_state::AppState;
+use graphql_schema::{MutationRoot, QueryRoot};
+use rusoto_core::Region;
+use rusoto_credential::{EnvironmentProvider, ProvideAwsCredentials};
+use rusoto_dynamodb::DynamoDbClient;
 
 mod filters {
     use super::MutationRoot;
@@ -137,6 +54,8 @@ mod handlers {
 async fn main() {
     dotenv::dotenv().ok();
 
+    println!("Steps#1");
+
     EnvironmentProvider::default()
         .credentials()
         .await
@@ -145,28 +64,21 @@ async fn main() {
 
     let dynamodb_client = DynamoDbClient::new(Region::EuCentral1);
 
-    println!("Steps#1");
-
     let app_state = AppState {
         db_client: dynamodb_client,
     };
 
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+        .register_type::<graphql_schema::Node>()
         .data(app_state.clone())
         .finish()
         .clone();
 
-    println!("Steps#2");
-
     let graphql = filters::graphql(schema);
-
-    println!("Steps#3");
 
     let index = warp::path::end().map(|| "Ok");
 
     let routes = index.or(filters::health()).or(graphql);
-
-    println!("Steps#4");
 
     println!("Server is runnning on PORT 8080");
 
