@@ -1,27 +1,10 @@
 use crate::coffee_type::CoffeeType;
-use crate::database::{save_coffee_order, SaveCoffeeOrderInput};
+use crate::coffee_order_type::GQLCoffeeOrder;
+use crate::database::{find_coffee_order_by_id, save_coffee_order, SaveCoffeeOrderInput};
 use crate::AppState;
 use async_graphql::{Context, FieldError, FieldResult, InputObject, Interface, Object, ID};
-use rusoto_dynamodb::{AttributeValue, Condition, DynamoDb, DynamoDbClient, ScanInput};
+use rusoto_dynamodb::DynamoDbClient;
 use serde_json::json;
-use std::collections::HashMap;
-
-pub struct GQLCoffeeOrder {
-    id: ID,
-    coffee_type: CoffeeType,
-}
-
-#[Object(name = "CoffeeOrder")]
-impl GQLCoffeeOrder {
-    pub async fn id(&self) -> ID {
-        self.id.clone()
-    }
-
-    #[field(name = "coffeeType")]
-    pub async fn coffee_type(&self) -> CoffeeType {
-        self.coffee_type
-    }
-}
 
 #[Interface(field(name = "id", type = "ID"), arg(name = "id", type = "String"))]
 pub enum Node {
@@ -37,7 +20,7 @@ impl QueryRoot {
     }
 
     async fn node(&self, ctx: &Context<'_>, id: String) -> FieldResult<Option<Node>> {
-        let node_definition = match extract_id_from_relay_node_id(&id) {
+        let node_definition = match extract_node_definition_from_relay_node_id(&id) {
             Some(node) => node,
             None => return Ok(None),
         };
@@ -46,66 +29,20 @@ impl QueryRoot {
         match node_definition.node_type.as_str() {
             "CoffeeOrder" => {
                 println!("Query DynamoDB for CoffeeOrder by id: {}", id);
+                let entity_id = node_definition.node_id;
 
-                let mut scan_input = HashMap::new();
-
-                let attr = AttributeValue {
-                    b: None,
-                    bool: None,
-                    bs: None,
-                    l: None,
-                    m: None,
-                    s: Some(node_definition.node_id),
-                    ns: None,
-                    null: None,
-                    n: None,
-                    ss: None,
-                };
-
-                let mut attribute_value_list: Vec<AttributeValue> = Vec::new();
-
-                attribute_value_list.insert(0, attr);
-
-                let condition = Condition {
-                    attribute_value_list: Some(attribute_value_list),
-                    comparison_operator: String::from("EQ"),
-                };
-
-                scan_input.insert(String::from("pk"), condition);
-
-                let scan_input: ScanInput = ScanInput {
-                    attributes_to_get: None,
-                    conditional_operator: None,
-                    consistent_read: None,
-                    exclusive_start_key: None,
-                    expression_attribute_names: None,
-                    expression_attribute_values: None,
-                    filter_expression: None,
-                    index_name: None,
-                    limit: None,
-                    projection_expression: None,
-                    return_consumed_capacity: None,
-                    segment: None,
-                    select: None,
-                    scan_filter: Some(scan_input),
-                    total_segments: None,
-                    table_name: String::from("CoffeeShop"),
-                };
-
-                let order = match db.scan(scan_input).await {
+                let result = match find_coffee_order_by_id(db, entity_id).await {
                     Ok(order) => {
-                        println!("Order {:?}", order);
-                        Some(order)
+                        order.map(|o| o).or(None)
                     }
                     Err(e) => {
-                        println!("Error at scan for coffee order {:?}", e);
                         None
                     }
                 };
 
                 Ok(Some(
                     GQLCoffeeOrder {
-                        id: String::from("coffeeOrderId").into(),
+                        id: result.unwrap().id, 
                         coffee_type: CoffeeType::Cappuccino,
                     }
                     .into(),
@@ -120,6 +57,8 @@ impl QueryRoot {
 pub struct OrderCoffeeInput {
     #[field(name = "coffeType")]
     coffee_type: CoffeeType,
+    #[field(name = "customerName")]
+    customer_name: String,
 }
 
 pub struct MutationRoot;
@@ -139,7 +78,7 @@ impl MutationRoot {
 
         let mutation_input = SaveCoffeeOrderInput {
             coffee_type: input.coffee_type,
-            customer_name: String::from("Ozer"),
+            customer_name: input.customer_name,
         };
 
         let result = match save_coffee_order(db_client, mutation_input).await {
@@ -166,7 +105,7 @@ pub struct NodeDefinition {
     node_id: String,
 }
 
-pub fn extract_id_from_relay_node_id(relay_node_id: &str) -> Option<NodeDefinition> {
+pub fn extract_node_definition_from_relay_node_id(relay_node_id: &str) -> Option<NodeDefinition> {
     let decoded = match base64::decode(relay_node_id) {
         Ok(result) => result,
         Err(e) => {
@@ -201,6 +140,6 @@ pub fn extract_id_from_relay_node_id(relay_node_id: &str) -> Option<NodeDefiniti
     })
 }
 
-fn as_relay_id(entity_name: &str, id: i32) -> ID {
+pub fn as_relay_id(entity_name: &str, id: String) -> ID {
     base64::encode(format!("{}:{}", entity_name, id)).into()
 }

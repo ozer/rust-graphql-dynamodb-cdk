@@ -1,4 +1,5 @@
 mod app_state;
+mod coffee_order_type;
 mod coffee_type;
 mod database;
 mod graphql_schema;
@@ -7,11 +8,8 @@ use async_graphql::{EmptySubscription, Schema};
 use dotenv;
 use warp::Filter;
 
-use app_state::AppState;
+use app_state::{get_app_state, AppState};
 use graphql_schema::{MutationRoot, QueryRoot};
-use rusoto_core::Region;
-use rusoto_credential::{EnvironmentProvider, ProvideAwsCredentials};
-use rusoto_dynamodb::DynamoDbClient;
 
 mod filters {
     use super::MutationRoot;
@@ -56,17 +54,7 @@ async fn main() {
 
     println!("Steps#1");
 
-    EnvironmentProvider::default()
-        .credentials()
-        .await
-        .ok()
-        .expect("NO ENVIRONMENT VARIABLE PROVIDED!");
-
-    let dynamodb_client = DynamoDbClient::new(Region::EuCentral1);
-
-    let app_state = AppState {
-        db_client: dynamodb_client,
-    };
+    let app_state = get_app_state().await;
 
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .register_type::<graphql_schema::Node>()
