@@ -4,7 +4,6 @@ on:
     branches:
       - master
 
-
 jobs:
   build:
       name: Deploy ECR
@@ -13,27 +12,54 @@ jobs:
         - name: Checkout
           uses: actions/checkout@master
 
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1
+        - name: Setup node
+          uses: actions/setup-node@v1
           with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: eu-central-1
+            node-version: '12.x'
 
-        - name: Login to Amazon ECR
-          id: login-ecr
-          uses: aws-actions/amazon-ecr-login@v1
+        - name: Get yarn cache
+          id: yarn-cache
+          run: echo "::set-output name=dir::$(yarn cache dir)"
 
-        - name: Build, Tag, Push Image to AWS ECR 
-          id: build-image
+        - name: Cache yarn
+          uses: actions/cache@v1
+          with:
+            path: ${{ steps.yarn-cache.outputs.dir }}
+            key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+            restore-keys: |
+                ${{ runner.os }}-yarn-
+        
+        - name: Install & Deploy CDK
           env:
-            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-            ECR_REPOSITORY: coffee-shop-api
-            IMAGE_TAG: ${{ github.sha }}
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           run: |
-            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-            echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            cd cdk
+            yarn install
+            yarn build
+            yarn deploy
+
+        # - name: Configure AWS credentials
+        #   uses: aws-actions/configure-aws-credentials@v1
+        #   with:
+        #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        #     aws-region: eu-central-1
+
+        # - name: Login to Amazon ECR
+        #   id: login-ecr
+        #   uses: aws-actions/amazon-ecr-login@v1
+
+        # - name: Build, Tag, Push Image to AWS ECR 
+        #   id: build-image
+        #   env:
+        #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        #     ECR_REPOSITORY: coffee-shop-api
+        #     IMAGE_TAG: ${{ github.sha }}
+        #   run: |
+        #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
         # - name: Download task definition
         #   run: |

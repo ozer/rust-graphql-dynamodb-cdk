@@ -1,5 +1,5 @@
-use crate::coffee_type::CoffeeType;
 use crate::coffee_order_type::GQLCoffeeOrder;
+use crate::coffee_type::CoffeeType;
 use crate::database::{find_coffee_order_by_id, save_coffee_order, SaveCoffeeOrderInput};
 use crate::AppState;
 use async_graphql::{Context, FieldError, FieldResult, InputObject, Interface, Object, ID};
@@ -32,17 +32,20 @@ impl QueryRoot {
                 let entity_id = node_definition.node_id;
 
                 let result = match find_coffee_order_by_id(db, entity_id).await {
-                    Ok(order) => {
-                        order.map(|o| o).or(None)
-                    }
+                    Ok(order) => match order {
+                        Some(o) => o,
+                        None => {
+                            return Ok(None);
+                        }
+                    },
                     Err(e) => {
-                        None
+                        return Ok(None);
                     }
                 };
 
                 Ok(Some(
                     GQLCoffeeOrder {
-                        id: result.unwrap().id, 
+                        id: result.id,
                         coffee_type: CoffeeType::Cappuccino,
                     }
                     .into(),
@@ -141,5 +144,6 @@ pub fn extract_node_definition_from_relay_node_id(relay_node_id: &str) -> Option
 }
 
 pub fn as_relay_id(entity_name: &str, id: String) -> ID {
-    base64::encode(format!("{}:{}", entity_name, id)).into()
+    let relay_id = base64::encode(format!("{}:{}", entity_name, id)).into();
+    relay_id
 }

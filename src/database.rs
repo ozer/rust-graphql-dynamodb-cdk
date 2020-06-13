@@ -2,6 +2,7 @@ use crate::coffee_order_type::GQLCoffeeOrder;
 use crate::coffee_type::CoffeeType;
 use crate::graphql_schema::as_relay_id;
 
+use async_graphql::ID;
 use chrono::Utc;
 use rusoto_core::RusotoError;
 use rusoto_dynamodb::{
@@ -130,7 +131,6 @@ pub async fn find_coffee_order_by_id(
 
     let order = match db.query(query_input).await {
         Ok(output) => {
-            println!("output: {:?}", output);
             println!("Success!");
             Ok(output)
         }
@@ -175,19 +175,17 @@ pub async fn find_coffee_order_by_id(
         None => return Ok(None),
     };
 
-    println!("primarykey: {}", pk);
-
     let sk_attr = match first_item.get(&"sk".to_string()) {
         Some(attr) => attr,
         None => return Ok(None),
     };
 
-    let sk = match pk_attr.clone().n {
-        Some(s) => s,
-        None => return Ok(None),
+    let sk = match sk_attr.clone().n {
+        Some(n) => n,
+        None => String::from(""),
     };
 
-    let gql_order =Some(GQLCoffeeOrder {
+    let gql_order = Some(GQLCoffeeOrder {
         id: as_relay_id("CoffeeOrder".to_string().as_ref(), pk),
         coffee_type: CoffeeType::Latte,
     });

@@ -1,6 +1,8 @@
 use async_graphql::{Context, FieldError, FieldResult, InputObject, Interface, Object, ID};
 use crate::coffee_type::CoffeeType;
 
+
+#[derive(Debug)]
 pub struct GQLCoffeeOrder {
   pub id: ID,
   pub coffee_type: CoffeeType,
