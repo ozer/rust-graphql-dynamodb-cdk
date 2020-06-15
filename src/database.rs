@@ -2,12 +2,11 @@ use crate::coffee_order_type::GQLCoffeeOrder;
 use crate::coffee_type::CoffeeType;
 use crate::graphql_schema::as_relay_id;
 
-use async_graphql::ID;
 use chrono::Utc;
 use rusoto_core::RusotoError;
 use rusoto_dynamodb::{
     AttributeValue, DynamoDb, DynamoDbClient, PutItemError, PutItemInput, PutItemOutput,
-    QueryError, QueryInput, QueryOutput,
+    QueryError, QueryInput,
 };
 use std::collections::HashMap;
 use uuid::Uuid;

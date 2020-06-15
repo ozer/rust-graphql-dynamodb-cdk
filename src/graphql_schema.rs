@@ -82,7 +82,7 @@ impl MutationRoot {
             customer_name: input.customer_name,
         };
 
-        let result = match save_coffee_order(db_client, mutation_input).await {
+        match save_coffee_order(db_client, mutation_input).await {
             Ok(coffee_order) => println!("result: {:?}", coffee_order),
             Err(err) => {
                 let my_extension =
@@ -94,7 +94,7 @@ impl MutationRoot {
             }
         };
 
-        Ok("hey".to_string())
+        Ok("Ok".to_string())
     }
 }
 

@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate log;
 
 mod app_state;
@@ -15,7 +14,6 @@ use app_state::{get_app_state, AppState};
 use graphql_schema::{MutationRoot, QueryRoot};
 
 mod filters {
-    use super::AppState;
     use super::MutationRoot;
     use super::QueryRoot;
     use async_graphql::{EmptySubscription, Schema};
