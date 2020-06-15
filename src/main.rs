@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 mod app_state;
 mod coffee_order_type;
 mod coffee_type;
@@ -12,6 +15,7 @@ use app_state::{get_app_state, AppState};
 use graphql_schema::{MutationRoot, QueryRoot};
 
 mod filters {
+    use super::AppState;
     use super::MutationRoot;
     use super::QueryRoot;
     use async_graphql::{EmptySubscription, Schema};
@@ -25,8 +29,18 @@ mod filters {
     pub fn graphql(
         schema: Schema<QueryRoot, MutationRoot, EmptySubscription>,
     ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+        let graphql_log = warp::log::custom(|info| {
+            eprintln!(
+                "{} {} {} {:?}",
+                info.method(),
+                info.path(),
+                info.status(),
+                info.elapsed(),
+            );
+        });
         warp::path!("graphql")
             .and(async_graphql_warp::graphql(schema).and_then(super::handlers::graphql))
+            .with(graphql_log)
     }
 }
 
@@ -51,8 +65,7 @@ mod handlers {
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
-
-    println!("Steps#1");
+    pretty_env_logger::init();
 
     let app_state = get_app_state().await;
 
@@ -67,8 +80,6 @@ async fn main() {
     let index = warp::path::end().map(|| "Ok");
 
     let routes = index.or(filters::health()).or(graphql);
-
-    println!("Server is runnning on PORT 8080");
 
     warp::serve(routes).run(([0, 0, 0, 0], 8080)).await;
 }

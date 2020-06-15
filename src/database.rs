@@ -163,10 +163,8 @@ pub async fn find_coffee_order_by_id(
         None => return Ok(None),
     };
 
-    println!("first_item: {:?}", first_item);
-
     let pk_attr = match first_item.get(&"pk".to_string()) {
-        Some(attr) => attr,
+        Some(attr) => attr.clone(),
         None => return Ok(None),
     };
 
@@ -176,8 +174,8 @@ pub async fn find_coffee_order_by_id(
     };
 
     let sk_attr = match first_item.get(&"sk".to_string()) {
-        Some(attr) => attr,
-        None => return Ok(None),
+        Some(attr) => attr.clone(),
+        None => number_attribute_value("".to_string()),
     };
 
     let sk = match sk_attr.clone().n {
@@ -185,10 +183,30 @@ pub async fn find_coffee_order_by_id(
         None => String::from(""),
     };
 
+    let coffee_type_attr = match first_item.get(&"coffeeType".to_string()) {
+        Some(attr) => match attr.clone().s {
+            Some(coffee_type) => coffee_type,
+            None => String::from(""),
+        },
+        None => String::from(""),
+    };
+
+    let coffee_type_enum: CoffeeType = coffee_type_attr.parse().unwrap();
+
+    let customer_name = get_customer_name_from_pk(pk.clone());
     let gql_order = Some(GQLCoffeeOrder {
         id: as_relay_id("CoffeeOrder".to_string().as_ref(), pk),
-        coffee_type: CoffeeType::Latte,
+        customer_name,
+        coffee_type: coffee_type_enum,
     });
 
     Ok(gql_order)
+}
+
+pub fn get_customer_name_from_pk(pk: String) -> String {
+    let splitted: Vec<&str> = pk.split("#").collect();
+    match splitted.first() {
+        Some(&n) => n.to_string(),
+        None => "".to_string(),
+    }
 }

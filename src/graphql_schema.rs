@@ -46,7 +46,8 @@ impl QueryRoot {
                 Ok(Some(
                     GQLCoffeeOrder {
                         id: result.id,
-                        coffee_type: CoffeeType::Cappuccino,
+                        coffee_type: result.coffee_type,
+                        customer_name: result.customer_name
                     }
                     .into(),
                 ))
@@ -74,10 +75,7 @@ impl MutationRoot {
         ctx: &Context<'_>,
         input: OrderCoffeeInput,
     ) -> FieldResult<String> {
-        println!("hey!!");
         let db_client: DynamoDbClient = ctx.data::<AppState>().db_client.clone();
-
-        println!("hey22!!");
 
         let mutation_input = SaveCoffeeOrderInput {
             coffee_type: input.coffee_type,
@@ -87,8 +85,6 @@ impl MutationRoot {
         let result = match save_coffee_order(db_client, mutation_input).await {
             Ok(coffee_order) => println!("result: {:?}", coffee_order),
             Err(err) => {
-                println!("Cant save coffee order!");
-
                 let my_extension =
                     json!({ "details": "Could not find a room guest", "error": err.to_string() });
                 return Err(FieldError(

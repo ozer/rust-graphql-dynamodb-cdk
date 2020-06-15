@@ -47,6 +47,8 @@ export class CdkStack extends cdk.Stack {
         AWS_ACCESS_KEY_ID: process.env?.AWS_ACCESS_KEY_ID || ":(",
         AWS_SECRET_ACCESS_KEY: process.env?.AWS_SECRET_ACCESS_KEY || ":(",
       },
+      cpu: 128,
+      memoryLimitMiB: 256,
       logging: new AwsLogDriver({ streamPrefix: "coffee-shop" }),
     });
 
