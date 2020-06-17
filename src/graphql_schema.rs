@@ -1,6 +1,9 @@
 use crate::coffee_order_type::GQLCoffeeOrder;
 use crate::coffee_type::CoffeeType;
-use crate::database::{find_coffee_order_by_id, save_coffee_order, SaveCoffeeOrderInput};
+use crate::database::{
+    fetch_coffee_orders, find_coffee_order_by_id, get_customer_name_from_pk, save_coffee_order,
+    SaveCoffeeOrderInput,
+};
 use crate::AppState;
 use async_graphql::{Context, FieldError, FieldResult, InputObject, Interface, Object, ID};
 use rusoto_dynamodb::DynamoDbClient;
@@ -38,7 +41,7 @@ impl QueryRoot {
                             return Ok(None);
                         }
                     },
-                    Err(e) => {
+                    Err(_) => {
                         return Ok(None);
                     }
                 };
@@ -47,13 +50,44 @@ impl QueryRoot {
                     GQLCoffeeOrder {
                         id: result.id,
                         coffee_type: result.coffee_type,
-                        customer_name: result.customer_name
+                        customer_name: result.customer_name,
                     }
                     .into(),
                 ))
             }
             _ => Ok(None),
         }
+    }
+
+    async fn coffee_orders(&self, ctx: &Context<'_>) -> FieldResult<Option<Vec<GQLCoffeeOrder>>> {
+        let db = ctx.data::<AppState>().db_client.clone();
+        let output = match fetch_coffee_orders(db).await {
+            Ok(output) => output,
+            Err(_) => return Ok(None),
+        };
+
+        let mut coffee_orders = vec![];
+
+        let vec_orders = output.items.unwrap();
+
+        for i in 0..vec_orders.len() {
+            let order = vec_orders[i].clone();
+            if let (Some(pk), Some(coffee_type)) = (
+                order.get("pk").unwrap().s.clone(),
+                order.get("coffeeType").unwrap().s.clone(),
+            ) {
+                let coffee_type_enum: CoffeeType = coffee_type.parse().unwrap();
+
+                let order = GQLCoffeeOrder {
+                    id: as_relay_id("CoffeeType", pk.clone()),
+                    coffee_type: coffee_type_enum,
+                    customer_name: get_customer_name_from_pk(pk),
+                };
+                coffee_orders.push(order);
+            }
+        }
+
+        Ok(Some(coffee_orders))
     }
 }
 
@@ -74,7 +108,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         input: OrderCoffeeInput,
-    ) -> FieldResult<String> {
+    ) -> FieldResult<GQLCoffeeOrder> {
         let db_client: DynamoDbClient = ctx.data::<AppState>().db_client.clone();
 
         let mutation_input = SaveCoffeeOrderInput {
@@ -82,11 +116,11 @@ impl MutationRoot {
             customer_name: input.customer_name,
         };
 
-        match save_coffee_order(db_client, mutation_input).await {
-            Ok(coffee_order) => println!("result: {:?}", coffee_order),
+        let coffee_order = match save_coffee_order(db_client, mutation_input).await {
+            Ok(coffee_order) => coffee_order,
             Err(err) => {
                 let my_extension =
-                    json!({ "details": "Could not find a room guest", "error": err.to_string() });
+                    json!({ "details": "Could not find a coffee order", "error": err.to_string() });
                 return Err(FieldError(
                     String::from("Cannot Save Coffee Order"),
                     Some(my_extension),
@@ -94,7 +128,7 @@ impl MutationRoot {
             }
         };
 
-        Ok("Ok".to_string())
+        Ok(coffee_order)
     }
 }
 

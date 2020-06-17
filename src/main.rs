@@ -29,16 +29,19 @@ mod filters {
     ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
         let graphql_log = warp::log::custom(|info| {
             eprintln!(
-                "{} {} {} {:?}",
+                "{} {} {} {:?} {:?}",
                 info.method(),
                 info.path(),
                 info.status(),
+                info.user_agent(),
                 info.elapsed(),
             );
         });
-        warp::path!("graphql")
-            .and(async_graphql_warp::graphql(schema).and_then(super::handlers::graphql))
-            .with(graphql_log)
+        warp::body::content_length_limit(1024).and(
+            warp::path("graphql")
+                .and(async_graphql_warp::graphql(schema).and_then(super::handlers::graphql))
+                .with(graphql_log),
+        )
     }
 }
 

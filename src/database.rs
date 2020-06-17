@@ -5,8 +5,8 @@ use crate::graphql_schema::as_relay_id;
 use chrono::Utc;
 use rusoto_core::RusotoError;
 use rusoto_dynamodb::{
-    AttributeValue, DynamoDb, DynamoDbClient, PutItemError, PutItemInput, PutItemOutput,
-    QueryError, QueryInput,
+    AttributeValue, DynamoDb, DynamoDbClient, PutItemError, PutItemInput, QueryError, QueryInput,
+    ScanError, ScanInput, ScanOutput,
 };
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -46,10 +46,39 @@ pub struct SaveCoffeeOrderInput {
     pub customer_name: String,
 }
 
+pub async fn fetch_coffee_orders(db: DynamoDbClient) -> Result<ScanOutput, RusotoError<ScanError>> {
+    let scan_input = ScanInput {
+        table_name: String::from("CoffeeShop"),
+        limit: Some(50),
+        attributes_to_get: None,
+        conditional_operator: None,
+        consistent_read: None,
+        exclusive_start_key: None,
+        expression_attribute_names: None,
+        expression_attribute_values: None,
+        filter_expression: None,
+        index_name: None,
+        projection_expression: None,
+        return_consumed_capacity: None,
+        scan_filter: None,
+        segment: None,
+        total_segments: None,
+        select: None,
+    };
+
+    match db.scan(scan_input).await {
+        Ok(output) => Ok(output),
+        Err(error) => {
+            println!("Error: {:?}", error);
+            Err(error)
+        }
+    }
+}
+
 pub async fn save_coffee_order(
     db: DynamoDbClient,
     input: SaveCoffeeOrderInput,
-) -> Result<PutItemOutput, RusotoError<PutItemError>> {
+) -> Result<GQLCoffeeOrder, RusotoError<PutItemError>> {
     let mut order = HashMap::new();
 
     let order_id: String = Uuid::new_v4().to_string();
@@ -69,7 +98,7 @@ pub async fn save_coffee_order(
     order.insert("sk".to_string(), sk);
     order.insert("coffeeType".to_string(), coffee_type);
 
-    let input = PutItemInput {
+    let put_item_input = PutItemInput {
         condition_expression: None,
         conditional_operator: None,
         expected: None,
@@ -82,12 +111,12 @@ pub async fn save_coffee_order(
         return_values: None,
     };
 
-    match db.put_item(input).await {
-        Ok(output) => {
-            println!("output: {:?}", output);
-            println!("Success!");
-            Ok(output)
-        }
+    match db.put_item(put_item_input).await {
+        Ok(_) => Ok(GQLCoffeeOrder {
+            id: as_relay_id("CoffeeOrder".to_string().as_ref(), order_id),
+            customer_name: input.customer_name,
+            coffee_type: input.coffee_type,
+        }),
         Err(error) => {
             println!("Error: {:?}", error);
             Err(error)
@@ -134,7 +163,7 @@ pub async fn find_coffee_order_by_id(
             Ok(output)
         }
         Err(error) => {
-            println!("Error: {:?}", error);
+            println!("Error at finding coffee order by id:[{}] -> {:?}", id, error);
             return Err(error);
         }
     };
@@ -172,15 +201,15 @@ pub async fn find_coffee_order_by_id(
         None => return Ok(None),
     };
 
-    let sk_attr = match first_item.get(&"sk".to_string()) {
-        Some(attr) => attr.clone(),
-        None => number_attribute_value("".to_string()),
-    };
+    // let sk_attr = match first_item.get(&"sk".to_string()) {
+    //     Some(attr) => attr.clone(),
+    //     None => number_attribute_value("".to_string()),
+    // };
 
-    let sk = match sk_attr.clone().n {
-        Some(n) => n,
-        None => String::from(""),
-    };
+    // let sk = match sk_attr.clone().n {
+    //     Some(n) => n,
+    //     None => String::from(""),
+    // };
 
     let coffee_type_attr = match first_item.get(&"coffeeType".to_string()) {
         Some(attr) => match attr.clone().s {
