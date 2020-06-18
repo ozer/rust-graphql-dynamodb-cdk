@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-      name: Deploy ECR
+      name: Deploy Coffee Shop Rust Graph API
       runs-on: ubuntu-latest
       steps:
         - name: Checkout

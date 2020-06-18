@@ -1,4 +1,5 @@
 import * as cdk from "@aws-cdk/core";
+import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import { Vpc, SubnetType } from "@aws-cdk/aws-ec2";
 import {
   Cluster,
@@ -14,6 +15,13 @@ export class CdkStack extends cdk.Stack {
     super(scope, id, props);
 
     // The code that defines your stack goes here
+    const table = new dynamodb.Table(this, "CoffeeShop", {
+      partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "sk", type: dynamodb.AttributeType.NUMBER },
+      writeCapacity: 5,
+      readCapacity: 5,
+    });
+
     const vpc = new Vpc(this, "CoffeeShopVPC", {
       cidr: "11.180.0.0/16",
       maxAzs: 2,
