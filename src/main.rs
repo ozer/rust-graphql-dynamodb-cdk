@@ -37,7 +37,7 @@ mod filters {
                 info.elapsed(),
             );
         });
-        warp::body::content_length_limit(1024).and(
+        warp::body::content_length_limit(1024 * 32).and(
             warp::path("graphql")
                 .and(async_graphql_warp::graphql(schema).and_then(super::handlers::graphql))
                 .with(graphql_log),

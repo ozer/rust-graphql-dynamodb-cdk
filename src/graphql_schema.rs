@@ -51,6 +51,7 @@ impl QueryRoot {
                         id: result.id,
                         coffee_type: result.coffee_type,
                         customer_name: result.customer_name,
+                        timestamp: result.timestamp
                     }
                     .into(),
                 ))
@@ -72,9 +73,10 @@ impl QueryRoot {
 
         for i in 0..vec_orders.len() {
             let order = vec_orders[i].clone();
-            if let (Some(pk), Some(coffee_type)) = (
+            if let (Some(pk), Some(coffee_type), Some(sk)) = (
                 order.get("pk").unwrap().s.clone(),
                 order.get("coffeeType").unwrap().s.clone(),
+                order.get("sk").unwrap().n.clone()
             ) {
                 let coffee_type_enum: CoffeeType = coffee_type.parse().unwrap();
 
@@ -82,6 +84,7 @@ impl QueryRoot {
                     id: as_relay_id("CoffeeType", pk.clone()),
                     coffee_type: coffee_type_enum,
                     customer_name: get_customer_name_from_pk(pk),
+                    timestamp: sk.parse::<i64>().unwrap()
                 };
                 coffee_orders.push(order);
             }

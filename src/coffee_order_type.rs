@@ -6,6 +6,7 @@ pub struct GQLCoffeeOrder {
     pub id: ID,
     pub customer_name: String,
     pub coffee_type: CoffeeType,
+    pub timestamp: i64,
 }
 
 #[Object(name = "CoffeeOrder")]
@@ -22,5 +23,9 @@ impl GQLCoffeeOrder {
     #[field(name = "customerName")]
     pub async fn customer_name(&self) -> String {
         self.customer_name.clone()
+    }
+
+    pub async fn timestamp(&self) -> i64 {
+        self.timestamp.clone()
     }
 }

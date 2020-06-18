@@ -90,7 +90,7 @@ pub async fn save_coffee_order(
     let now = Utc::now().timestamp_millis().to_string();
 
     let pk = string_attribute_value(composite_pk);
-    let sk = number_attribute_value(now);
+    let sk = number_attribute_value(now.clone());
 
     let coffee_type = string_attribute_value(input.coffee_type.to_string());
 
@@ -116,6 +116,7 @@ pub async fn save_coffee_order(
             id: as_relay_id("CoffeeOrder".to_string().as_ref(), order_id),
             customer_name: input.customer_name,
             coffee_type: input.coffee_type,
+            timestamp: now.parse::<i64>().unwrap(),
         }),
         Err(error) => {
             println!("Error: {:?}", error);
@@ -201,15 +202,15 @@ pub async fn find_coffee_order_by_id(
         None => return Ok(None),
     };
 
-    // let sk_attr = match first_item.get(&"sk".to_string()) {
-    //     Some(attr) => attr.clone(),
-    //     None => number_attribute_value("".to_string()),
-    // };
+    let sk_attr = match first_item.get(&"sk".to_string()) {
+        Some(attr) => attr.clone(),
+        None => number_attribute_value("".to_string()),
+    };
 
-    // let sk = match sk_attr.clone().n {
-    //     Some(n) => n,
-    //     None => String::from(""),
-    // };
+    let sk = match sk_attr.clone().n {
+        Some(n) => n,
+        None => String::from(""),
+    };
 
     let coffee_type_attr = match first_item.get(&"coffeeType".to_string()) {
         Some(attr) => match attr.clone().s {
@@ -226,6 +227,7 @@ pub async fn find_coffee_order_by_id(
         id: as_relay_id("CoffeeOrder".to_string().as_ref(), pk),
         customer_name,
         coffee_type: coffee_type_enum,
+        timestamp: sk.parse::<i64>().unwrap(),
     });
 
     Ok(gql_order)
