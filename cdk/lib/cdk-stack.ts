@@ -20,6 +20,7 @@ export class CdkStack extends cdk.Stack {
       sortKey: { name: "sk", type: dynamodb.AttributeType.NUMBER },
       writeCapacity: 5,
       readCapacity: 5,
+      tableName: 'CoffeeShop'
     });
 
     const vpc = new Vpc(this, "CoffeeShopVPC", {
