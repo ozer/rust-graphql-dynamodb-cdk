@@ -53,8 +53,8 @@ export class CdkStack extends cdk.Stack {
       image,
       environment: {
         STAGE: "prod",
-        AWS_ACCESS_KEY_ID: process.env?.AWS_ACCESS_KEY_ID || ":(",
-        AWS_SECRET_ACCESS_KEY: process.env?.AWS_SECRET_ACCESS_KEY || ":(",
+        AWS_ACCESS_KEY_ID: process.env?.API_AWS_ACCESS_KEY_ID || ":(",
+        AWS_SECRET_ACCESS_KEY: process.env?.API_AWS_SECRET_ACCESS_KEY || ":(",
       },
       cpu: 128,
       memoryLimitMiB: 256,
