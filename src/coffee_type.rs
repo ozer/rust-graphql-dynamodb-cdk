@@ -3,12 +3,12 @@ use async_graphql::Enum;
 #[Enum]
 #[derive(Debug)]
 pub enum CoffeeType {
-    Cappuccino = "Cappuccino",
-    Americano = "Americano",
-    Espresso = "Espresso",
-    Macchiato = "Macchiato",
-    Mocha = "Mocha",
-    Latte = "Latte",
+    Cappuccino,
+    Americano,
+    Espresso,
+    Macchiato,
+    Mocha,
+    Latte,
 }
 
 impl std::fmt::Display for CoffeeType {
