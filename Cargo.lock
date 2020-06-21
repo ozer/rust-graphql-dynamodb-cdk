@@ -45,9 +45,9 @@ checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
 
 [[package]]
 name = "async-graphql"
-version = "1.14.12"
+version = "1.15.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c52efb919dd5e034efc300657866bee69bd8feaa3c0cef18de076e2e000fa4db"
+checksum = "6c61663d14cf2ab7958467e07c17252f63f2aeda5a2181ff3e712f54ea87a12f"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -77,6 +77,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "slab",
+ "spin",
  "tempfile",
  "thiserror",
  "tracing",
@@ -238,10 +239,11 @@ dependencies = [
 
 [[package]]
 name = "bson"
-version = "0.14.1"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c177ed0122f24ce5e0f05bf9b29e79f3ac1a359bc504e0e14c3b34896c71c00"
+checksum = "95cba0c807bb47ef40cce9c699e74ecd2aa77ae5ab838e0a645c58569495e406"
 dependencies = [
+ "base64 0.12.1",
  "byteorder",
  "chrono",
  "hex 0.3.2",
@@ -1885,6 +1887,12 @@ dependencies = [
  "redox_syscall",
  "winapi 0.3.8",
 ]
+
+[[package]]
+name = "spin"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "standback"
