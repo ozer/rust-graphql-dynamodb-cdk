@@ -13,15 +13,27 @@ use warp::Filter;
 use app_state::{get_app_state, AppState};
 use graphql_schema::{MutationRoot, QueryRoot};
 
-mod filters {
+pub mod filters {
+    use super::app_state::get_app_state;
     use super::MutationRoot;
     use super::QueryRoot;
     use async_graphql::{EmptySubscription, Schema};
+    use warp::http::status::StatusCode;
     use warp::Filter;
 
     pub fn health() -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone
     {
-        warp::path!("health").and(warp::get()).map(|| Ok("Ok"))
+        warp::path("health").and_then(|| async move {
+            match get_app_state().await {
+                Ok(ok) => Ok::<StatusCode, std::convert::Infallible>(StatusCode::OK),
+                Err(e) => {
+                    println!("Error at get_app_state: {}", e);
+                    return Ok::<StatusCode, std::convert::Infallible>(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                    );
+                }
+            }
+        })
     }
 
     pub fn graphql(
@@ -45,7 +57,7 @@ mod filters {
     }
 }
 
-mod handlers {
+pub mod handlers {
     use super::MutationRoot;
     use super::QueryRoot;
     use async_graphql::http::GQLResponse;
@@ -84,3 +96,21 @@ async fn main() {
 
     warp::serve(routes).run(([0, 0, 0, 0], 8080)).await;
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::filters;
+//     use warp::http::StatusCode;
+//     use warp::test::request;
+
+//     #[tokio::test]
+//     async fn test_health() {
+//         dotenv::dotenv().ok();
+
+//         let health = filters::health();
+
+//         let resp = request().method("GET").path("/health").reply(&health).await;
+
+//         assert_eq!(resp.status(), StatusCode::OK);
+//     }
+// }
