@@ -1,4 +1,4 @@
-# Rust GraphQL API
+# Rust GraphQL API ![Main Workflow](https://github.com/ozer/rust-graphql-dynamodb/workflows/Main%20Workflow/badge.svg?branch=master)
 
 ## Deploy to AWS Fargate using CDK
 
@@ -19,6 +19,8 @@ cp .env.dev .env
 ---
 
 ### Deploying AWS Fargate using CDK via GitHub Actions
+
+### `Uncomment yarn cdk deploy command in deploy.yml file!`
 
 - Make sure you define below credentials in your `GitHub Actions` settings.
 
