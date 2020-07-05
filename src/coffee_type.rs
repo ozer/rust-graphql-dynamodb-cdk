@@ -13,7 +13,7 @@ pub enum CoffeeType {
 
 impl std::fmt::Display for CoffeeType {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        std::fmt::Debug::fmt(self, f)
+        write!(f, "{}", self)
     }
 }
 
@@ -28,7 +28,7 @@ impl std::str::FromStr for CoffeeType {
             "Macchiato" => Ok(CoffeeType::Macchiato),
             "Mocha" => Ok(CoffeeType::Mocha),
             "Latte" => Ok(CoffeeType::Latte),
-            _ => Err(format!("'{}' is not a valid value for CoffeeOrder!", s))
+            _ => Err(format!("'{}' is not a valid value for CoffeeOrder!", s)),
         }
     }
 }

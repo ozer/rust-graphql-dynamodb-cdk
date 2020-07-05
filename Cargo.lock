@@ -45,9 +45,9 @@ checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
 
 [[package]]
 name = "async-graphql"
-version = "1.15.15"
+version = "1.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c61663d14cf2ab7958467e07c17252f63f2aeda5a2181ff3e712f54ea87a12f"
+checksum = "db3846fd4346d044e86880734d4b8d1823f6a460c451a9c07df54ff88d99bb45"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -55,7 +55,7 @@ dependencies = [
  "async-graphql-parser",
  "async-stream",
  "async-trait",
- "base64 0.12.2",
+ "base64 0.12.3",
  "bson",
  "byteorder",
  "bytes",
@@ -87,9 +87,9 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-derive"
-version = "1.15.15"
+version = "1.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18c43efde9af512e13079c11e31746b0b58e5ed6564587790c9cddc8071ea0b2"
+checksum = "db1b90f5d1ebdefeeff3532afa8d76b237a9e6a03a83c762444b7109d8844888"
 dependencies = [
  "Inflector",
  "async-graphql-parser",
@@ -115,9 +115,9 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-warp"
-version = "1.14.20"
+version = "1.16.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "744dd18c89f41024c6c42f401143ed8a61a1b06d00ac5543fbfbf955a65b1436"
+checksum = "02f444c6f6fa5803990c45735e314419a1a608ea2fbd9c131c2d9e58667ea044"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -198,9 +198,9 @@ checksum = "b41b7ea54a0c9d92199de89e20e58d49f02f8e699814ef3fdf266f6f748d15c7"
 
 [[package]]
 name = "base64"
-version = "0.12.2"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e223af0dc48c96d4f8342ec01a4974f139df863896b316681efd36742f22cc67"
+checksum = "3441f0f7b02788e948e47f457ca01f1d7e6d92c693bc132c22b087d3141c03ff"
 
 [[package]]
 name = "bitflags"
@@ -246,7 +246,7 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95cba0c807bb47ef40cce9c699e74ecd2aa77ae5ab838e0a645c58569495e406"
 dependencies = [
- "base64 0.12.2",
+ "base64 0.12.3",
  "byteorder",
  "chrono",
  "hex 0.3.2",
@@ -310,9 +310,9 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
 name = "chrono"
-version = "0.4.11"
+version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80094f509cf8b5ae86a4966a39b3ff66cd7e2a3e594accec3743ff3fabeab5b2"
+checksum = "f0fee792e164f78f5fe0c296cc2eb3688a2ca2b70cdff33040922d298203f0c4"
 dependencies = [
  "num-integer",
  "num-traits",
@@ -345,7 +345,7 @@ version = "0.1.0"
 dependencies = [
  "async-graphql",
  "async-graphql-warp",
- "base64 0.12.2",
+ "base64 0.12.3",
  "chrono",
  "dotenv",
  "http",
@@ -693,7 +693,7 @@ version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed18eb2459bf1a09ad2d6b1547840c3e5e62882fa09b9a6a20b1de8e3228848f"
 dependencies = [
- "base64 0.12.2",
+ "base64 0.12.3",
  "bitflags",
  "bytes",
  "headers-core",
@@ -1623,7 +1623,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "841ca8f73e7498ba39146ab43acea906bbbb807d92ec0b7ea4b6293d2621f80d"
 dependencies = [
  "async-trait",
- "base64 0.12.2",
+ "base64 0.12.3",
  "bytes",
  "futures",
  "hmac",
@@ -1685,7 +1685,7 @@ version = "0.44.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9eddff187ac18c5a91d9ccda9353f30cf531620dce437c4db661dfe2e23b2029"
 dependencies = [
- "base64 0.12.2",
+ "base64 0.12.3",
  "bytes",
  "futures",
  "hex 0.4.2",
@@ -1825,9 +1825,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.55"
+version = "1.0.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec2c5d7e739bc07a3e73381a39d61fdb5f671c60c1df26a130690665803d8226"
+checksum = "3433e879a558dde8b5e8feb2a04899cf34fdde1fafb894687e52105fc1162ac3"
 dependencies = [
  "indexmap",
  "itoa",
