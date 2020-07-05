@@ -1,4 +1,4 @@
-# Rust GraphQL API ![Main Workflow](https://github.com/ozer/rust-graphql-dynamodb/workflows/Main%20Workflow/badge.svg?branch=master)
+# Rust GraphQL API
 
 ## Deploy to AWS Fargate using CDK
 
