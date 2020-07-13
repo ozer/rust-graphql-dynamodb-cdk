@@ -45,9 +45,9 @@ checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
 
 [[package]]
 name = "async-graphql"
-version = "1.16.5"
+version = "1.16.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db3846fd4346d044e86880734d4b8d1823f6a460c451a9c07df54ff88d99bb45"
+checksum = "ce1f0183671a6222b0745fd9ee189e681883613876d3741aa2ffaec746c4b6dc"
 dependencies = [
  "Inflector",
  "anyhow",
