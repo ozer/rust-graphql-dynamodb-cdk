@@ -45,9 +45,9 @@ checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
 
 [[package]]
 name = "async-graphql"
-version = "1.16.5"
+version = "1.16.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db3846fd4346d044e86880734d4b8d1823f6a460c451a9c07df54ff88d99bb45"
+checksum = "86a3e144f088b0b64c4d284fb97fb910c6da8b280187e581909e0dfed403fbd8"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -67,7 +67,6 @@ dependencies = [
  "httparse",
  "indexmap",
  "itertools",
- "log 0.4.8",
  "mime 0.3.16",
  "multer",
  "once_cell",
@@ -83,6 +82,7 @@ dependencies = [
  "tracing",
  "url",
  "uuid",
+ "xlog",
 ]
 
 [[package]]
@@ -2529,6 +2529,16 @@ checksum = "d59cefebd0c892fa2dd6de581e937301d8552cb44489cdff035c6187cb63fa5e"
 dependencies = [
  "winapi 0.2.8",
  "winapi-build",
+]
+
+[[package]]
+name = "xlog"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2bd258055cedb6f8f7d208a14851d43edf2631a4f2cb53ebbac2e9754e105ef"
+dependencies = [
+ "log 0.4.8",
+ "serde_json",
 ]
 
 [[package]]
