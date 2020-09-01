@@ -45,9 +45,9 @@ checksum = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
 
 [[package]]
 name = "async-graphql"
-version = "1.16.5"
+version = "1.17.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db3846fd4346d044e86880734d4b8d1823f6a460c451a9c07df54ff88d99bb45"
+checksum = "d6e84a776a26aa7d4a81f22e368a45dd7df8a85bb5b46f9875f916a99e3184d2"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -74,9 +74,9 @@ dependencies = [
  "parking_lot",
  "regex",
  "serde",
- "serde_derive",
  "serde_json",
  "slab",
+ "smallvec",
  "spin",
  "tempfile",
  "thiserror",
@@ -87,9 +87,9 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-derive"
-version = "1.16.5"
+version = "1.17.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db1b90f5d1ebdefeeff3532afa8d76b237a9e6a03a83c762444b7109d8844888"
+checksum = "e9249c3122b9877101a34422cfe1a04dca6f1c86146fbc3746949a90c05d2601"
 dependencies = [
  "Inflector",
  "async-graphql-parser",
@@ -102,22 +102,23 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-parser"
-version = "1.14.7"
+version = "1.17.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aab17073d5090dfacbd705bcc15c2092fd550fb194ebc1e764babc1a20f67371"
+checksum = "82bad60689666ebc06a856788c8394161fcd88522647cbc8593447c6441461f4"
 dependencies = [
  "arrayvec",
  "pest",
  "pest_derive",
+ "serde",
  "serde_json",
  "thiserror",
 ]
 
 [[package]]
 name = "async-graphql-warp"
-version = "1.16.4"
+version = "1.17.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02f444c6f6fa5803990c45735e314419a1a608ea2fbd9c131c2d9e58667ea044"
+checksum = "68ef17f9743239befe371907a802247504015feb0735887ee392d1c5a16f0bca"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -1907,9 +1908,9 @@ checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 
 [[package]]
 name = "smallvec"
-version = "1.4.0"
+version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7cb5678e1615754284ec264d9bb5b4c27d2018577fd90ac0ceb578591ed5ee4"
+checksum = "fbee7696b84bbf3d89a1c2eccff0850e3047ed46bfcd2e92c29a2d074d57e252"
 
 [[package]]
 name = "socket2"
